@@ -20,6 +20,8 @@ public class Main {
     static int [] end= new int[2];
     static  int size;
     static String mazePath;
+    static ArrayList<Coordinate>open=new ArrayList<>();
+
     public static void main(String[] args) throws IOException {
 
         //Making Post Request to start the race.......
@@ -46,7 +48,7 @@ public class Main {
             sb1.append(line1 + "\n");
         }
         br1.close();
-        System.out.println(sb1.toString());
+       // System.out.println(sb1.toString());
         JsonObject jsonObject1 = new Gson().fromJson(sb1.toString(), JsonObject.class);
         String url=baseUrl+jsonObject1.get("nextMaze").getAsString();
 
@@ -56,7 +58,7 @@ public class Main {
                 (HttpURLConnection) new URL(url).openConnection();
         httpClient.setRequestMethod("GET");
         int responseCode = httpClient.getResponseCode();
-        System.out.println(responseCode);
+        //System.out.println(responseCode);
         BufferedReader br = new BufferedReader(new InputStreamReader(httpClient.getInputStream()));
         StringBuilder sb = new StringBuilder();
         String line;
@@ -64,11 +66,11 @@ public class Main {
             sb.append(line + "\n");
         }
         br.close();
-        System.out.println(sb.toString());
+       // System.out.println(sb.toString());
 
         //Parsing and storing Json Elements...
         JsonObject jsonObject = new Gson().fromJson(sb.toString(), JsonObject.class);
-        System.out.println(jsonObject.get("name"));
+      //  System.out.println(jsonObject.get("name"));
         name=jsonObject.get("name").toString();
         start[0]=jsonObject.get("startingPosition").getAsJsonArray().get(0).getAsInt();
         start[1]=jsonObject.get("startingPosition").getAsJsonArray().get(1).getAsInt();
@@ -86,43 +88,58 @@ public class Main {
                 maze[i][j]=a.get(j).getAsCharacter();
         }
 
-       // System.out.println(maze[end[1]][end[0]]);
-        //System.out.println(maze[start[1]][start[0]]);
-        for(int i=0;i<size;i++) {
-//            for (int j = 0; j < size; j++)
-//                System.out.print(maze[i][j]);
-//            System.out.print("\n");
-        }
-
         //algo starts here
         Node[][] dij= new Node[size][size];
-        for(int i=0;i<size;i++)
-            for(int j=0;j<size;j++)
-                dij[i][j]= new Node();
+        for(int i=0;i<size;i++){
+            for(int j=0;j<size;j++) {
+                dij[i][j] = new Node();
+                dij[i][j].h= (int) Math.sqrt((i-end[1])*(i-end[1])+(j-end[0])*(j-end[0]));
+                //System.out.println(dij[i][j].h);
+            }
+        }
         //dij[start[1]][start[0]].visited=true;
         dij[start[1]][start[0]].v=0;
         dij[start[1]][start[0]].path='q';
+        dij[start[1]][start[0]].open=true;
+        open.add(new Coordinate(start[1],start[0]));
+
 
         while(true)
         {
             int lx=0,ly=0;
             int lv=Integer.MAX_VALUE;
+//            for(int i=0;i<size;i++) {
+//                for (int j = 0; j < size; j++) {
+//                    //System.out.println(dij[i][j].v +"   "+ dij[i][j].h+" "+i+","+j);
+//                    if (!dij[i][j].visited&&dij[i][j].v!=Integer.MAX_VALUE&&dij[i][j].v+dij[i][j].h< lv) {
+//                        lx = i;
+//                        ly = j;
+//                        lv = dij[i][j].v+dij[i][j].h;
+//                       // System.out.println("changed "+lv);
+//                    }
+//                }
+//            }
 
-            for(int i=0;i<size;i++) {
-                for (int j = 0; j < size; j++) {
-                    if (!dij[i][j].visited&&dij[i][j].v < lv) {
-                        lx = i;
-                        ly = j;
-                        lv = dij[i][j].v;
-                    }
+            Coordinate xy,remove=new Coordinate(0,0);
+            for(int i=0;i<open.size();i++)
+            {
+                xy=open.get(i);
+                if (!dij[xy.x][xy.y].visited&&dij[xy.x][xy.y].v!=Integer.MAX_VALUE&&dij[xy.x][xy.y].v+dij[xy.x][xy.y].h< lv) {
+                    remove=xy;
+                    lx = xy.x;
+                    ly = xy.y;
+                    lv = dij[xy.x][xy.y].v+dij[xy.x][xy.y].h;
+                    // System.out.println("changed "+lv);
                 }
             }
-
-           // System.out.println(maze[lx][ly]);
+            open.remove(remove);
+            dij[lx][ly].open=false;
             dij[lx][ly].visited=true;
 
             //North
             if(lx-1>=0&&maze[lx-1][ly]!='X'&& !dij[lx-1][ly].visited) {
+                if(!dij[lx-1][ly].open)
+                    open.add(new Coordinate(lx-1,ly));
                 if(dij[lx-1][ly].v>dij[lx][ly].v+1){
                     dij[lx-1][ly].v=dij[lx][ly].v+1;
                     dij[lx-1][ly].path='N';
@@ -133,6 +150,8 @@ public class Main {
 
             //South
             if(lx+1<size&&maze[lx+1][ly]!='X'&& !dij[lx+1][ly].visited) {
+                if(!dij[lx+1][ly].open)
+                    open.add(new Coordinate(lx+1,ly));
                 if(dij[lx+1][ly].v>dij[lx][ly].v+1){
                     dij[lx+1][ly].v=dij[lx][ly].v+1;
                     dij[lx+1][ly].path='S';
@@ -143,6 +162,8 @@ public class Main {
 
             //  West
             if(ly-1>=0&&maze[lx][ly-1]!='X'&& !dij[lx][ly-1].visited) {
+                if(!dij[lx][ly-1].open)
+                    open.add(new Coordinate(lx,ly-1));
                 if(dij[lx][ly-1].v>dij[lx][ly].v+1){
                     dij[lx][ly-1].v=dij[lx][ly].v+1;
                     dij[lx][ly-1].path='W';
@@ -152,6 +173,8 @@ public class Main {
             }
             //  East
             if(ly+1<size&&maze[lx][ly+1]!='X'&& !dij[lx][ly+1].visited) {
+                if(!dij[lx][ly+1].open)
+                    open.add(new Coordinate(lx,ly+1));
                 if(dij[lx][ly+1].v>dij[lx][ly].v+1){
                     dij[lx][ly+1].v=dij[lx][ly].v+1;
                     dij[lx][ly+1].path='E';
@@ -194,7 +217,7 @@ public class Main {
 
         // reverse StringBuilder input1
         input1 = input1.reverse();
-        System.out.println(input1.toString());
+      //  System.out.println(input1.toString());
         URL postUrl = new URL ("https://api.noopschallenge.com"+mazePath);
         URLConnection con = postUrl.openConnection();
         HttpURLConnection http = (HttpURLConnection)con;
@@ -218,11 +241,17 @@ public class Main {
             sb.append(line + "\n");
         }
         br.close();
-        System.out.println(sb.toString());
+        //System.out.println(sb.toString());
         jsonObject = new Gson().fromJson(sb.toString(), JsonObject.class);
-        url=baseUrl+jsonObject.get("nextMaze").getAsString();
-        System.out.println(responseCode);
+        try{
+        url=baseUrl+jsonObject.get("nextMaze").getAsString();}
+        catch(Exception e){
+            System.out.println(jsonObject.get("certificate").getAsString());
+            System.out.println(jsonObject.get("message").getAsString());
+            break;
         }
+        //System.out.println(responseCode);
+        }
+        //System.out.println(sb1.toString());
     }
 }
-abfghijkmnoll
