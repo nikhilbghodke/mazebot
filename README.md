@@ -7,4 +7,7 @@ If your code Solves all the Mazes in race mode then GitHub gives you a certifica
 The code solves the race mode Of the maze bot api effectively. It uses Dijsktras Algorithm to solve the mazes.
 
 ## Certificate
-The best timing that the code has attained in the race mode is 19.166 sec . And here is the Certificate attained for the best Timing [certificate](https://api.noopschallenge.com/mazebot/race/certificate/NCiYGVGf_kYTZPU5fMUh4FV-JGOfhHLVeXXBQK7bAR1NoIwI_-BSiESQvuXKFB54)
+The best timing that the code has attained in the race mode is 19.166 sec . 
+1) Dijkstras algorithm [certificate](https://api.noopschallenge.com/mazebot/race/certificate/NCiYGVGf_kYTZPU5fMUh4FV-JGOfhHLVeXXBQK7bAR1NoIwI_-BSiESQvuXKFB54)
+
+2) Code run on cloud [certificate](https://api.noopschallenge.com/mazebot/race/certificate/NCiYGVGf_kYTZPU5fMUh4MvpJUP-46B5hdeEUTJcYFvGJS5x_T0gXWdMUYaIGa-z)
